@@ -8,28 +8,33 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * класс для записи предложений с шаблонами в файл
  */
-public class QueueWriter implements Runnable {
+public class QueueWriterThread extends Thread {
     private ConcurrentLinkedQueue<String> queueToWrite;
     private String fileName;
+    private boolean allFilesWasProcessed;
 
-    public QueueWriter(ConcurrentLinkedQueue<String> queueToWrite, String fileName) {
+    public QueueWriterThread(ConcurrentLinkedQueue<String> queueToWrite, String fileName) {
         this.queueToWrite = queueToWrite;
         this.fileName = fileName;
+        allFilesWasProcessed = false;
+    }
+
+    public void setAllFilesWasProcessed(boolean state) {
+        allFilesWasProcessed = state;
     }
 
     @Override
     public void run() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
-            while (!Thread.currentThread().isInterrupted()) {
+            boolean continueLoop = true;
+            while (!allFilesWasProcessed || !queueToWrite.isEmpty()) {
                 String stringFromPull = queueToWrite.poll();
-                if (stringFromPull != null) {
+                while (stringFromPull != null) {
                     writer.write(stringFromPull);
                     writer.write("\n");
+                    stringFromPull = queueToWrite.poll();
                 }
             }
-            writer.close();
-            System.out.println("stop writer");
-            return;
         } catch (IOException ex) {
             ex.getStackTrace();
             return;

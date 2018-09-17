@@ -10,30 +10,24 @@ public class PatternFinder implements Runnable {
     private String[] pattern;
     private ConcurrentLinkedQueue<String> readableQueue;
     private ConcurrentLinkedQueue<String> writableQueueWithPatterns;
-    private boolean allFilesWasReaded;
 
-    public PatternFinder(String[] pattern, ConcurrentLinkedQueue readableQueue, ConcurrentLinkedQueue writableQueueWithPatterns) {
+    public PatternFinder(String[] pattern, ConcurrentLinkedQueue readableQueue,
+                         ConcurrentLinkedQueue writableQueueWithPatterns) {
         this.pattern = pattern;
         this.readableQueue = readableQueue;
         this.writableQueueWithPatterns = writableQueueWithPatterns;
-        allFilesWasReaded = false;
     }
 
     @Override
     public void run() {
         while (true) {
-            String stringToCheck = writableQueueWithPatterns.poll();
-            if (stringToCheck != null && findPatternInString(stringToCheck)) {
-                writableQueueWithPatterns.add(stringToCheck);
-            } else if (stringToCheck == null && allFilesWasReaded) {
-                System.out.println("patternFinder finished");
-                return;
+            String stringToCheck = readableQueue.poll();
+            if (stringToCheck != null) {
+                if (findPatternInString(stringToCheck)) {
+                    writableQueueWithPatterns.add(stringToCheck);
+                }
             }
         }
-    }
-
-    public void setAllFilesWasReadedr(boolean allFilesWasReaded) {
-        this.allFilesWasReaded = allFilesWasReaded;
     }
 
     /**
