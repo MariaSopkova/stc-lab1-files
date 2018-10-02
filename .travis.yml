@@ -11,7 +11,7 @@ os:
 
 branches:
   only:
-    -feature/gradle
+    -develop
 
 before_cache:
   -rm -f $HOME/stcLabFiles/.gradle/caches/modules-2/modules-2.lock
