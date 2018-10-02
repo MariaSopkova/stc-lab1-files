@@ -12,8 +12,8 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
         try {
             String[] files = getFilesPath(args[0]);
-            String[] pattrns = patters(args[1]);
-            getOccurencies(files, pattrns, args[2]);
+            String[] string_patters = patters(args[1]);
+            getOccurencies(files, string_patters, args[2]);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -21,32 +21,23 @@ public class Main {
     }
 
     public static void getOccurencies(String[] sources, String[] words, String res) throws InterruptedException {
-        System.out.println(System.currentTimeMillis());
         long start = System.currentTimeMillis();
         ConcurrentLinkedQueue<String> queue = new ConcurrentLinkedQueue<>();
         ConcurrentLinkedQueue<String> queueWithPatterns = new ConcurrentLinkedQueue<>();
 
-        FilesReaderThread readerThread = new FilesReaderThread(queue, sources);
+        FilesReaderThread readerThread = new FilesReaderThread(queueWithPatterns, sources, words);
         readerThread.start();
 
-        PatternFinderThread finderThread = new PatternFinderThread(queue, queueWithPatterns, words);
-        finderThread.start();
-        QueueWriterThread writer = new QueueWriterThread(queueWithPatterns, "result.txt");
+        QueueWriterThread writer = new QueueWriterThread(queueWithPatterns, res);
         writer.start();
 
         readerThread.join();
         System.out.println("readerThread joined");
         System.out.println(queue.size());
-        finderThread.setAllFilesWasRead(true);
-        while (!queue.isEmpty()) {
-            System.out.println(queue.size());
-        }
-        finderThread.interrupt();
-        finderThread.join();
+
         writer.setAllFilesWasProcessed(true);
         writer.join();
         System.out.println("work time: " + (System.currentTimeMillis() - start));
-        System.out.println(System.currentTimeMillis());
     }
 
     public static String[] getFilesPath(String fileInfoPath) throws IOException {
@@ -64,16 +55,21 @@ public class Main {
         while ((filePath = reader.readLine()) != null) {
             files.add(filePath);
         }
-        return (String[]) files.toArray();
+
+        String[] result = {};
+        String[] returnResult = files.toArray(result);
+        return returnResult;
     }
 
     public static String[] patters(String fileName) throws IOException {
-        BufferedReader pattrnsReader = new BufferedReader(new FileReader(new File(fileName)));
+        BufferedReader pattersReader = new BufferedReader(new FileReader(new File(fileName)));
         String pattern;
         List<String> patterns = new ArrayList<>();
-        while ((pattern = pattrnsReader.readLine()) != null) {
+        while ((pattern = pattersReader.readLine()) != null) {
             patterns.add(pattern);
         }
-        return (String[]) patterns.toArray();
+        String[] result = {};
+        String[] returnResult = patterns.toArray(result);
+        return returnResult;
     }
 }
