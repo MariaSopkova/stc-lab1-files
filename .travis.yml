@@ -24,4 +24,4 @@ cache:
 
 script:
 - ./stcLabFiles/gradlew assemble
-- ./stcLabFiles/gradlew check --rerun-task
+- ./stcLabFiles/gradlew check -- rerun-task
