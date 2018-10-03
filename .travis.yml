@@ -4,10 +4,10 @@ install: true
 
 dist: trusty
 jdk:
-  -oraclejdk8
+- oraclejdk8
 
 os:
-  -linux
+- linux
 
 # branches:
 #   only:
